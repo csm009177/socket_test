@@ -80,6 +80,28 @@
     let userLat = null;
     let userLng = null;
 
+    // 위치 정보 가져오기 및 지도 표시
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          userLat = position.coords.latitude;
+          userLng = position.coords.longitude;
+          showMap(userLat, userLng);
+        },
+        function (error) {
+          alert(
+            "위치 권한이 차단되어 있습니다.\n" +
+            "브라우저 주소창 왼쪽의 자물쇠(🔒) 아이콘을 클릭해\n" +
+            "'사이트 설정'에서 위치 권한을 허용해 주세요."
+          );
+          window.location.href = "https://www.naver.com";
+        }
+      );
+    } else {
+      alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+      window.location.href = "https://www.naver.com";
+    }
+
     // 지도 및 내 위치 마커 표시
     function showMap(lat, lng) {
       const options = {
@@ -93,23 +115,6 @@
         map: map,
         title: "내 위치"
       });
-    }
-
-    // 위치 정보 가져오기
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (position) {
-        userLat = position.coords.latitude;
-        userLng = position.coords.longitude;
-        showMap(userLat, userLng);
-      }, function (error) {
-        userLat = 37.5665;
-        userLng = 126.9780;
-        showMap(userLat, userLng);
-      });
-    } else {
-      userLat = 37.5665;
-      userLng = 126.9780;
-      showMap(userLat, userLng);
     }
   </script>
   <!-- ...생략... -->
