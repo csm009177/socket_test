@@ -1,11 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>실시간 채팅</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+  <!-- <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script> -->
 </head>
 <body>
-  
+  <h2>🗨️ 실시간 채팅방</h2>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="메시지를 입력하세요" onkeypress="if(event.key === 'Enter') sendMessage();">
+  <button id="send" onclick="sendMessage()">보내기</button>
+
+  <script>
+    const socket = io();
+
+    socket.on('message', function(msg) {
+      const chat = document.getElementById('chat');
+      const msgDiv = document.createElement('div');
+      msgDiv.textContent = msg;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    function sendMessage() {
+      const input = document.getElementById('message');
+      const msg = input.value.trim();
+      if (msg) {
+        socket.send(msg);
+        input.value = '';
+      }
+    }
+  </script>
 </body>
 </html>
