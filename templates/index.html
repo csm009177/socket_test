@@ -19,47 +19,98 @@
 
 <body>
   <h2>🗨️ 실시간 채팅방</h2>
+  <div>
+    <input type="text" id="username" placeholder="이름을 입력하세요">
+  </div>
   <div id="chat"></div>
   <input type="text" id="message" placeholder="메시지를 입력하세요" onkeypress="if(event.key === 'Enter') sendMessage();">
   <button id="send" onclick="sendMessage()">보내기</button>
 
-  <script>
-    const socket = io();
-
-    socket.on('message', function (msg) {
-      const chat = document.getElementById('chat');
-      const msgDiv = document.createElement('div');
-      msgDiv.textContent = msg;
-      chat.appendChild(msgDiv);
-      chat.scrollTop = chat.scrollHeight;
-    });
-
-    function sendMessage() {
-      const input = document.getElementById('message');
-      const msg = input.value.trim();
-      if (msg) {
-        socket.send(msg);
-        input.value = '';
+  <!-- ...생략... -->
+    <script>
+      const socket = io();
+  
+      // 메시지 수신 시 채팅창에 표시 + 위치 마커 표시
+      socket.on('message', function (data) {
+        const chat = document.getElementById('chat');
+        const msgDiv = document.createElement('div');
+        // 이름, 메시지, 위치 표시
+        msgDiv.textContent = (data.username ? data.username : '익명') + ': ' + data.text +
+          (data.lat && data.lng ? ` (위치: ${data.lat}, ${data.lng})` : '');
+        chat.appendChild(msgDiv);
+        chat.scrollTop = chat.scrollHeight;
+  
+        // 위치 정보가 있으면 지도에 마커 추가
+        if (data.lat && data.lng && map) {
+          new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(data.lat, data.lng),
+            map: map,
+            title: "사용자 위치"
+          });
+        }
+      });
+  
+      // 메시지 전송 함수
+      function sendMessage() {
+        const input = document.getElementById('message');
+        const usernameInput = document.getElementById('username');
+        const msg = input.value.trim();
+        const username = usernameInput.value.trim() || '익명';
+        if (msg) {
+          socket.emit('message', {
+            username: username,
+            text: msg,
+            lat: userLat,
+            lng: userLng
+          });
+          input.value = '';
+        }
       }
-    }
-  </script>
-
-  <h2>🗺️ 카카오 지도</h2>
-  <div id="map"></div>
-
-  <script>
-    const container = document.getElementById('map');
-    const options = {
-      center: new kakao.maps.LatLng(37.5665, 126.9780),
-      level: 3
-    };
-    const map = new kakao.maps.Map(container, options);
-
-    const marker = new kakao.maps.Marker({
-      position: new kakao.maps.LatLng(37.5665, 126.9780)
-    });
-    marker.setMap(map);
-  </script>
+    </script>
+  
+    <h2>🗺️ 카카오 지도</h2>
+    <div id="map"></div>
+  
+    <script>
+      const container = document.getElementById('map');
+      let map;
+      let myMarker;
+      let userLat = null;
+      let userLng = null;
+  
+      // 지도 및 내 위치 마커 표시
+      function showMap(lat, lng) {
+        const options = {
+          center: new kakao.maps.LatLng(lat, lng),
+          level: 3
+        };
+        map = new kakao.maps.Map(container, options);
+  
+        myMarker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(lat, lng),
+          map: map,
+          title: "내 위치"
+        });
+      }
+  
+      // 위치 정보 가져오기
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          userLat = position.coords.latitude;
+          userLng = position.coords.longitude;
+          showMap(userLat, userLng);
+        }, function (error) {
+          userLat = 37.5665;
+          userLng = 126.9780;
+          showMap(userLat, userLng);
+        });
+      } else {
+        userLat = 37.5665;
+        userLng = 126.9780;
+        showMap(userLat, userLng);
+      }
+    </script>
+  <!-- ...생략... -->
 </body>
 
 </html>
