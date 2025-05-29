@@ -12,9 +12,9 @@
       margin-top: 20px;
     }
   </style>
-  <!-- Socket.IO + Kakao Maps SDK -->
+  <!-- Socket.IO + Kakao Maps SDK (https로 명시) -->
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=51288a42ab25099a9055e918fa43e7d9"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=51288a42ab25099a9055e918fa43e7d9"></script>
 </head>
 
 <body>
@@ -26,8 +26,9 @@
   <input type="text" id="message" placeholder="메시지를 입력하세요" onkeypress="if(event.key === 'Enter') sendMessage();">
   <button id="send" onclick="sendMessage()">보내기</button>
 
-  <!-- ...생략... -->
   <script>
+    // ngrok 등 HTTPS 환경에서 외부 서비스 시, 주소를 명시적으로 지정해도 됨
+    // const socket = io('https://xxxx-xxx-xxx-xxx.ngrok-free.app');
     const socket = io();
 
     // 메시지 수신 시 채팅창에 표시 + 위치 마커 표시
@@ -95,6 +96,7 @@
             "브라우저 주소창 왼쪽의 자물쇠(🔒) 아이콘을 클릭해\n" +
             "'사이트 설정'에서 위치 권한을 허용해 주세요."
           );
+          window.location.href = "https://www.naver.com";
         }
       );
     } else {
@@ -117,7 +119,5 @@
       });
     }
   </script>
-  <!-- ...생략... -->
 </body>
-
 </html>
